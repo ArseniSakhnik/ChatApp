@@ -3,11 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp", "ChatApp\ChatApp.csproj", "{DD9A53D6-BA7B-4270-8761-274A886EF43C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseService", "DatabaseService\DatabaseService.csproj", "{6BE98D87-FBEE-4E0B-A240-EC1237D0F079}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{7304D2E8-00DE-4B6F-8BD9-BAD88E782359}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatApp", "ChatApp\ChatApp.csproj", "{DD9A53D6-BA7B-4270-8761-274A886EF43C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +15,6 @@ Global
 		{DD9A53D6-BA7B-4270-8761-274A886EF43C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD9A53D6-BA7B-4270-8761-274A886EF43C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD9A53D6-BA7B-4270-8761-274A886EF43C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6BE98D87-FBEE-4E0B-A240-EC1237D0F079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6BE98D87-FBEE-4E0B-A240-EC1237D0F079}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6BE98D87-FBEE-4E0B-A240-EC1237D0F079}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6BE98D87-FBEE-4E0B-A240-EC1237D0F079}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7304D2E8-00DE-4B6F-8BD9-BAD88E782359}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7304D2E8-00DE-4B6F-8BD9-BAD88E782359}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7304D2E8-00DE-4B6F-8BD9-BAD88E782359}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7304D2E8-00DE-4B6F-8BD9-BAD88E782359}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
