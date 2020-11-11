@@ -36,11 +36,13 @@ namespace ChatApp
             string connection = "Server=(localdb)\\mssqllocaldb;Database=chatapp;Trusted_Connection=True;";
             services.AddDbContext<DataContext>(options => options.UseSqlServer(connection));
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("ClientPermission", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000")
+                    policy.WithOrigins("https://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
@@ -84,6 +86,12 @@ namespace ChatApp
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                MinimumSameSitePolicy = SameSiteMode.Strict,
+                HttpOnly = HttpOnlyPolicy.Always,
+                Secure = CookieSecurePolicy.Always
+            });
 
             app.UseRouting();
 

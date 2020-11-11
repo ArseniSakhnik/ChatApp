@@ -37,6 +37,7 @@ namespace ChatApp.Services
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress)
         {
+            //получаем пользователя из базы данных
             var user = _context.Users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
 
             if (user == null)
@@ -54,30 +55,38 @@ namespace ChatApp.Services
             _context.Update(user);
             _context.SaveChanges();
 
+            
             return new AuthenticateResponse(user, jwtToken, refreshToken.Token);
         }
 
         public AuthenticateResponse RefreshToken(string token, string ipAddress)
         {
+            //находим пользователя, у которого имеется токен, сохраненный в куках контекса
             var user = _context.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
 
             if (user == null) return null;
 
+            //находим интересующий нас рефреш токен
             var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
 
             //вернуть null, если токен больше не активен
             if (!refreshToken.IsActive) return null;
 
-            // replace old refresh token with a new one and save
+            
+            //создаем новый рефреш токен
             var newRefreshToken = generateRefreshToken(ipAddress);
+            // добавим запись о том, когда рефреш токен был отозван, свойство isActive становится false
             refreshToken.Revoked = DateTime.UtcNow;
+            // с какого ip был отозван 
             refreshToken.RevokedByIp = ipAddress;
+            // предыдущй рефреш токен
             refreshToken.ReplacedByToken = newRefreshToken.Token;
+            // заменяем старый рефреш токен новым и сохраняем
             user.RefreshTokens.Add(newRefreshToken);
             _context.Update(user);
             _context.SaveChanges();
 
-            // generate new jwt
+            // также создаем новый джвт 
             var jwtToken = generateJwtToken(user);
 
             return new AuthenticateResponse(user, jwtToken, newRefreshToken.Token);
@@ -117,26 +126,36 @@ namespace ChatApp.Services
         private string generateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
+
+           //кодируем секретный ключ в набор байтов
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+
+            //настройки токена
             var tokenDescriptor = new SecurityTokenDescriptor
             {
+                //вставляем в токен информацию о юзере в виде его id
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString())
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(15),
+
+                //продолжительность жизни токена - 15 минут
+                Expires = DateTime.UtcNow.AddMinutes(1),
+                //Получает или задает учетные данные, используемые для подписывания токена.
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-
+            //создаем токен
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
 
         private RefreshToken generateRefreshToken(string ipAddress)
         {
+            //
             using (var rngCryptoServiceProvider = new RNGCryptoServiceProvider())
             {
                 var randomBytes = new byte[64];
+                //заполняем массив randomBytes криптостойкой последовательностью случайных значений
                 rngCryptoServiceProvider.GetBytes(randomBytes);
                 return new RefreshToken
                 {
