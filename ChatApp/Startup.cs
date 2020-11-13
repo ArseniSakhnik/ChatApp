@@ -17,6 +17,9 @@ using Microsoft.Extensions.Configuration;
 using System.Text;
 using ChatApp.Services;
 using ChatApp.Entities;
+using ChatApp.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using ChatApp.HubProvider;
 
 namespace ChatApp
 {
@@ -46,10 +49,12 @@ namespace ChatApp
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .AllowAnyHeader()
                         .SetIsOriginAllowedToAllowWildcardSubdomains();
                 });
             });
+
+            services.AddSignalR();
+
             services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -76,9 +81,27 @@ namespace ChatApp
                         // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
                         ClockSkew = TimeSpan.Zero
                     };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["jwtToken"];
+
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
+
                 });
 
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IMessageService, MessageService>();
+            services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
 
         }
 
@@ -101,8 +124,13 @@ namespace ChatApp
 
             app.UseAuthentication();
             app.UseAuthorization();
-            
-            app.UseEndpoints(x => x.MapControllers());
+
+            app.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                    endpoints.MapHub<DialogHub>("/dialogs");
+                    endpoints.MapHub<ChatHub>("/chat");
+                });
         }
     }
 }

@@ -29,6 +29,8 @@ namespace ChatApp.Services
         private DataContext _context;
         private readonly AppSettings _appSettings;
 
+        private readonly int jwtTokenLifeTimeExpires = 1;
+
         public UserService(DataContext context, IOptions<AppSettings> appSettings)
         {
             _context = context;
@@ -140,7 +142,7 @@ namespace ChatApp.Services
                 }),
 
                 //продолжительность жизни токена - 15 минут
-                Expires = DateTime.UtcNow.AddMinutes(1),
+                Expires = DateTime.UtcNow.AddMinutes(jwtTokenLifeTimeExpires),
                 //Получает или задает учетные данные, используемые для подписывания токена.
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
