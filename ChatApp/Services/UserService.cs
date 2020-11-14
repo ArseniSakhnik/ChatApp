@@ -138,7 +138,7 @@ namespace ChatApp.Services
                 //вставляем в токен информацию о юзере в виде его id
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
+                    new Claim(ClaimTypes.Name, user.Username)
                 }),
 
                 //продолжительность жизни токена - 15 минут
@@ -146,6 +146,8 @@ namespace ChatApp.Services
                 //Получает или задает учетные данные, используемые для подписывания токена.
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+
+
             //создаем токен
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);

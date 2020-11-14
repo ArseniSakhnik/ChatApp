@@ -16,6 +16,7 @@ namespace ChatApp.Services
         //bool SendMessage(int senderId, int recipientId, string text);
         //List<Message> GetLastMessages(int senderId);
         //List<Message> GetSenderAndRecipientMessages(int senderId, int recipientId);
+        List<Dialog> GetDialogs(string username);
     }
 
     public class MessageService : IMessageService
@@ -26,49 +27,17 @@ namespace ChatApp.Services
             _context = context;
         }
 
-        public bool SendMessage(string senderId, string dialogId, string text)
+        public List<Dialog> GetDialogs(string username)
         {
-            int? userId;
-            int? userDialogId;
-
-            try
-            {
-                userId = Int32.Parse(senderId);
-                userDialogId = Int32.Parse(dialogId);
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-
-            var dialog = _context.Dialogs.Where(d => d.Id == userDialogId).Include(d => d.UserDialog).ThenInclude(ud => ud.User).SingleOrDefault();
-
-            if (dialog == null)
-            {
-                return false;
-            }
-
-            var user = (from u in dialog.UserDialog where u.UserId == userId select u.User).SingleOrDefault();
+            var user = _context.Users.Where(u => u.Username == username).Include(u => u.UserDialog).ThenInclude(ud => ud.Dialog).SingleOrDefault();
 
             if (user == null)
             {
-                return false;
+                return null;
             }
 
-            _context.Messages.Add(new Message
-            {
-                Sender = user,
-                Dialog = dialog,
-                Text = text
-            });
-
-            _context.SaveChanges();
-
-            return true;
-
+            return user.UserDialog.Select(ud => ud.Dialog).ToList();
         }
-
-        publi
 
     }
 }

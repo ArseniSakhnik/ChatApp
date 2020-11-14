@@ -20,6 +20,8 @@ using ChatApp.Entities;
 using ChatApp.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using ChatApp.HubProvider;
+using Microsoft.AspNetCore.Http.Connections;
+using System.Diagnostics;
 
 namespace ChatApp
 {
@@ -53,8 +55,6 @@ namespace ChatApp
                 });
             });
 
-            services.AddSignalR();
-
             services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -86,10 +86,9 @@ namespace ChatApp
                     {
                         OnMessageReceived = context =>
                         {
-                            var accessToken = context.Request.Query["jwtToken"];
-
+                            var accessToken = context.Request.Query["access_token"];
                             var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/dialogs")))
                             {
                                 context.Token = accessToken;
                             }
@@ -98,7 +97,7 @@ namespace ChatApp
                     };
 
                 });
-
+            services.AddSignalR();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
@@ -128,7 +127,9 @@ namespace ChatApp
             app.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();
-                    endpoints.MapHub<DialogHub>("/dialogs");
+                    endpoints.MapHub<DialogHub>("/dialogs", options => {
+                        options.Transports = HttpTransportType.WebSockets;
+                    });
                     endpoints.MapHub<ChatHub>("/chat");
                 });
         }

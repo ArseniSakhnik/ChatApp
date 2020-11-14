@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Hubs
 {
-    [Authorize]
+    //[Authorize]
     public class DialogHub : Hub
     {
         private IMessageService _messageService;
@@ -19,8 +19,9 @@ namespace ChatApp.Hubs
 
         public async Task SendDialogs()
         {
-            //var messages = _messageService.GetLastMessages(Int32.Parse(Context.UserIdentifier));
-            //await Clients.User(Context.UserIdentifier).SendAsync("Receive", messages);
+
+            var dialogs = _messageService.GetDialogs(Context.UserIdentifier);
+            await Clients.User(Context.UserIdentifier).SendAsync("GetDialogs", dialogs);
         }
     }
 }

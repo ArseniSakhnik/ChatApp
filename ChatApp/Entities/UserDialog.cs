@@ -7,7 +7,7 @@ namespace ChatApp.Entities
 {
     public class UserDialog
     {
-        public int  UserId { get; set; }
+        public string  Username { get; set; }
         public User User { get; set; }
         public int DialogId { get; set; }
         public Dialog Dialog { get; set; }

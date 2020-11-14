@@ -21,12 +21,12 @@ namespace ChatApp.Helpers
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            modelBuilder.Entity<UserDialog>().HasKey(k => new { k.UserId, k.DialogId });
+            modelBuilder.Entity<UserDialog>().HasKey(k => new { k.Username, k.DialogId });
 
             modelBuilder.Entity<UserDialog>()
                 .HasOne(ud => ud.User)
                 .WithMany(u => u.UserDialog)
-                .HasForeignKey(ud => ud.UserId);
+                .HasForeignKey(ud => ud.Username);
 
             modelBuilder.Entity<UserDialog>()
                 .HasOne(ud => ud.Dialog)
@@ -38,8 +38,8 @@ namespace ChatApp.Helpers
                 .IsUnique();
 
             modelBuilder.Entity<User>().HasData(
-                    new { Id = 1, FirstName = "Alex", LastName = "Alekseew", Username = "test", Password = "test" },
-                    new { Id = 2, FirstName = "Alexandr", LastName = "Userowich", Username = "test2", Password = "test2" }
+                    new { FirstName = "Alex", LastName = "Alekseew", Username = "test", Password = "test" },
+                    new { FirstName = "Alexandr", LastName = "Userowich", Username = "test2", Password = "test2" }
                 );
 
             modelBuilder.Entity<Dialog>().HasData(
@@ -47,8 +47,8 @@ namespace ChatApp.Helpers
                 );
 
             modelBuilder.Entity<UserDialog>().HasData(
-                    new { UserId = 1, DialogId = 1 },
-                    new { UserId = 2, DialogId = 1 }
+                    new { Username = "test", DialogId = 1 },
+                    new { Username = "test2", DialogId = 1 }
                 );
 
             modelBuilder.Entity<Message>().HasData(
