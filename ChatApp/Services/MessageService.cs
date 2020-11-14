@@ -20,68 +20,55 @@ namespace ChatApp.Services
 
     public class MessageService : IMessageService
     {
-        //private DataContext _context;
+        private DataContext _context;
+        public MessageService(DataContext context)
+        {
+            _context = context;
+        }
 
-        //public MessageService(DataContext context)
-        //{
-        //    _context = context;
-        //}
+        public bool SendMessage(string senderId, string dialogId, string text)
+        {
+            int? userId;
+            int? userDialogId;
 
-        //public bool SendMessage(int senderId, int recipientId, string text)
-        //{
-        //    var recipient = _context.Users.SingleOrDefault(u => u.Id == recipientId);
+            try
+            {
+                userId = Int32.Parse(senderId);
+                userDialogId = Int32.Parse(dialogId);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
 
-        //    if (recipient == null)
-        //    {
-        //        return false;
-        //    }
+            var dialog = _context.Dialogs.Where(d => d.Id == userDialogId).Include(d => d.UserDialog).ThenInclude(ud => ud.User).SingleOrDefault();
 
-        //    var sender = _context.Users.SingleOrDefault(u => u.Id == senderId);
+            if (dialog == null)
+            {
+                return false;
+            }
 
-        //    if (sender == null)
-        //    {
-        //        return false;
-        //    }
+            var user = (from u in dialog.UserDialog where u.UserId == userId select u.User).SingleOrDefault();
 
-        //    _context.Messages.Add(new Message
-        //    {
-        //        SenderId = senderId,
-        //        RecipientId = recipientId,
-        //        Text = text
-        //    });
+            if (user == null)
+            {
+                return false;
+            }
 
-        //    _context.SaveChanges();
+            _context.Messages.Add(new Message
+            {
+                Sender = user,
+                Dialog = dialog,
+                Text = text
+            });
 
-        //    return true;
+            _context.SaveChanges();
 
-        //}
+            return true;
 
-        //public List<Message> GetLastMessages(int senderId)
-        //{
-        //    var userMessages = from m in _context.Messages where m.SenderId == senderId select m;
+        }
 
-        //    var recipients = (from r in userMessages select r.RecipientId).Distinct();
-
-        //    List<Message> lastMessages = new List<Message>();
-
-        //    foreach (var r in recipients)
-        //    {
-        //        //багованная строка
-        //        //var lastMessage = (from m in _context.Messages where m.RecipientId == r select m).ToList().Last();
-        //        var lastMessage = from m in _context.Messages where m.RecipientId == r select m;
-        //        if (lastMessage.Count() != 0)
-        //        {
-        //            lastMessages.Add(lastMessage.Last());
-        //        }
-        //    }
-
-        //    return lastMessages;
-        //}
-
-        //public List<Message> GetSenderAndRecipientMessages(int senderId, int recipientId)
-        //{
-        //    return (from m in _context.Messages where m.SenderId == senderId && m.RecipientId == recipientId select m).ToList();
-        //}
+        publi
 
     }
 }
