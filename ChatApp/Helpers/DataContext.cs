@@ -38,8 +38,8 @@ namespace ChatApp.Helpers
                 .IsUnique();
 
             modelBuilder.Entity<User>().HasData(
-                    new { FirstName = "Alex", LastName = "Alekseew", Username = "test", Password = "test" },
-                    new { FirstName = "Alexandr", LastName = "Userowich", Username = "test2", Password = "test2" }
+                    new { Username = "test", Password = "test" },
+                    new { Username = "test2", Password = "test2" }
                 );
 
             modelBuilder.Entity<Dialog>().HasData(
@@ -52,10 +52,10 @@ namespace ChatApp.Helpers
                 );
 
             modelBuilder.Entity<Message>().HasData(
-                    new { Id = 1, SenderId = 1, DialogId = 1, Text = "Hi" },
-                    new { Id = 2, SenderId = 2, DialogId = 1, Text = "Hi, how are you?" },
-                    new { Id = 3, SenderId = 1, DialogId = 1, Text = "I'm fine, what about you?" },
-                    new { Id = 4, SenderId = 2, DialogId = 1, Text = "I'm fine too. It's cool" }
+                    new { Id = 1, SenderUsername = "test", DialogId = 1, Text = "Hi"  },
+                    new { Id = 2, SenderUsername = "test2", DialogId = 1, Text = "Hi, how are you?" },
+                    new { Id = 3, SenderUsername = "test", DialogId = 1, Text = "I'm fine, what about you?" },
+                    new { Id = 4, SenderUsername = "test2", DialogId = 1, Text = "I'm fine too. It's cool" }
                 );
 
             base.OnModelCreating(modelBuilder);

@@ -27,6 +27,19 @@ namespace ChatApp.Controllers
             _userService = userService;
             _httpContextAccessor = httpContextAccessor;
         }
+        [AllowAnonymous]
+        [HttpPost("registration")]
+        public IActionResult Registration([FromBody] RegistrationRequest model) 
+        {
+            if (_userService.Registration(model))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(new { message = "Не удалось зарегистрироваться. Пользователь уже зарегистрирован" });
+            }
+        }
 
 
         [AllowAnonymous]

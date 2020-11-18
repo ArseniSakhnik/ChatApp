@@ -127,10 +127,10 @@ namespace ChatApp
             app.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();
-                    endpoints.MapHub<DialogHub>("/dialogs", options => {
+                    endpoints.MapHub<DialogHub>("/dialogs", options =>
+                    {
                         options.Transports = HttpTransportType.WebSockets;
                     });
-                    endpoints.MapHub<ChatHub>("/chat");
                 });
         }
     }

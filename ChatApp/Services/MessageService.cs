@@ -16,6 +16,7 @@ namespace ChatApp.Services
         //bool SendMessage(int senderId, int recipientId, string text);
         //List<Message> GetLastMessages(int senderId);
         //List<Message> GetSenderAndRecipientMessages(int senderId, int recipientId);
+        bool SendMessage(string username, int dialogId, string text);
         List<Dialog> GetDialogs(string username);
     }
 
@@ -29,15 +30,58 @@ namespace ChatApp.Services
 
         public List<Dialog> GetDialogs(string username)
         {
-            var user = _context.Users.Where(u => u.Username == username).Include(u => u.UserDialog).ThenInclude(ud => ud.Dialog).SingleOrDefault();
+            var user = _context.Users.Where(u => u.Username == username)
+                .Include(u => u.UserDialog)
+                .ThenInclude(ud => ud.Dialog)
+                .ThenInclude(d => d.Messages)
+                .ThenInclude(m => m.Sender)
+                .SingleOrDefault();
 
             if (user == null)
             {
                 return null;
             }
 
-            return user.UserDialog.Select(ud => ud.Dialog).ToList();
+            var dialogs = user.UserDialog.Select(ud => ud.Dialog).ToList();
+
+
+            return dialogs;
         }
 
+        public bool SendMessage(string username, int dialogId, string text)
+        {
+
+            var user = _context.Users.Where(u => u.Username == username)
+                .Include(u => u.UserDialog)
+                .ThenInclude(ud => ud.Dialog)
+                .ThenInclude(d => d.Messages)
+                .SingleOrDefault();
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var userDialog = user.UserDialog.Where(ud => ud.DialogId == dialogId).Select(ud => ud.Dialog).SingleOrDefault();
+
+            if (userDialog == null)
+            {
+                return false;
+            }
+
+            var message = new Message
+            {
+                Dialog = userDialog,
+                SenderUsername = user.Username,
+                Sender = user,
+                Text = text
+            };
+
+            userDialog.Messages.Add(message);
+
+            _context.SaveChanges();
+
+            return true;
+        }
     }
 }

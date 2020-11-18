@@ -22,6 +22,8 @@ namespace ChatApp.Services
         bool RevokeToken(string token, string ipAddress);
         IEnumerable<User> GetAll();
         User GetById(int id);
+
+        bool Registration(RegistrationRequest model);
     }
 
     public class UserService : IUserService
@@ -29,12 +31,31 @@ namespace ChatApp.Services
         private DataContext _context;
         private readonly AppSettings _appSettings;
 
-        private readonly int jwtTokenLifeTimeExpires = 1;
+        private readonly int jwtTokenLifeTimeExpires = 60;
 
         public UserService(DataContext context, IOptions<AppSettings> appSettings)
         {
             _context = context;
             _appSettings = appSettings.Value;
+        }
+
+        public bool Registration(RegistrationRequest model)
+        {
+            var user = _context.Users.SingleOrDefault(u => u.Username == model.Username);
+
+            if (user != null)
+            {
+                return false;
+            }
+
+            _context.Users.Add(new User
+            {
+                Username = model.Username,
+                Password = model.Password,
+            });
+
+            _context.SaveChanges();
+            return true;
         }
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress)
