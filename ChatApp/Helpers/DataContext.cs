@@ -43,7 +43,7 @@ namespace ChatApp.Helpers
                 );
 
             modelBuilder.Entity<Dialog>().HasData(
-                    new { Id = 1 }
+                    new { Id = 1, Name = "test, test2"}
                 );
 
             modelBuilder.Entity<UserDialog>().HasData(

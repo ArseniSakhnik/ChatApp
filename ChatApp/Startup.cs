@@ -41,6 +41,7 @@ namespace ChatApp
             string connection = "Server=(localdb)\\mssqllocaldb;Database=chatapp;Trusted_Connection=True;";
             services.AddDbContext<DataContext>(options => options.UseSqlServer(connection));
 
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddCors(options =>

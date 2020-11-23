@@ -1,6 +1,7 @@
 ﻿using ChatApp.Entities;
 using ChatApp.Helpers;
 using ChatApp.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -22,8 +23,11 @@ namespace ChatApp.Services
         bool RevokeToken(string token, string ipAddress);
         IEnumerable<User> GetAll();
         User GetById(int id);
-
         bool Registration(RegistrationRequest model);
+        bool UserExists(string username);
+        bool AddUserToDialog(string username, int dialogId);
+        bool RemoveUserFromDialog(string username, int dialogId);
+        List<string> GetNamesOfParticipiantsInDialogue(int dialogId);
     }
 
     public class UserService : IUserService
@@ -133,6 +137,109 @@ namespace ChatApp.Services
             _context.SaveChanges();
 
             return true;
+        }
+
+        public bool UserExists(string username)
+        {
+            var user = _context.Users.SingleOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public bool AddUserToDialog(string username, int dialogId)
+        {
+            var user = _context.Users.SingleOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var dialog = _context.Dialogs.Where(d => d.Id == dialogId).Include(d => d.UserDialog).SingleOrDefault();
+
+            if (dialog == null)
+            {
+                return false;
+            }
+            
+            
+
+            foreach (var ud in dialog.UserDialog)
+            {
+                if (ud.Username == username)
+                {
+                    return false;
+                }
+            }
+
+            dialog.Name += $", {username}";
+
+            dialog.UserDialog.Add(new UserDialog
+            {
+                DialogId = dialogId,
+                Username = username
+            });
+            _context.SaveChanges();
+            return true;
+        }
+
+        public bool RemoveUserFromDialog(string username, int dialogId)
+        {
+            var user = _context.Users.SingleOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var dialog = _context.Dialogs.Where(d => d.Id == dialogId).Include(d => d.UserDialog).SingleOrDefault();
+
+            if (dialog == null)
+            {
+                return false;
+            }
+
+            var ud = dialog.UserDialog.Where(ud => ud.Username == username && ud.DialogId == dialogId).SingleOrDefault();
+
+            if (ud == null)
+            {
+                return false;
+            }
+
+            if (dialog.Name.Contains($"{username}, "))
+            {
+                dialog.Name = dialog.Name.Replace($"{username}, ", "");
+            }
+            else 
+            {
+                dialog.Name = dialog.Name.Replace($", {username}", "");
+            }
+
+            dialog.UserDialog.Remove(ud);
+
+            _context.SaveChanges();
+
+            return true;
+        }
+
+
+        public List<string> GetNamesOfParticipiantsInDialogue(int dialogId)
+        {
+            var dialog = _context.Dialogs.Where(d => d.Id == dialogId).Include(d => d.UserDialog)
+                .ThenInclude(ud => ud.User).SingleOrDefault();
+
+            if (dialog == null)
+            {
+                return null;
+            }
+
+            var usernames = dialog.UserDialog.Select(ud => ud.User.Username);
+
+            return usernames.ToList();
         }
 
         public IEnumerable<User> GetAll()

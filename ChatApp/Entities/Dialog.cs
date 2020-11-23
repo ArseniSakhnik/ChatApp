@@ -11,9 +11,16 @@ namespace ChatApp.Entities
     {
         [Key]
         public int Id { get; set; }
+        public string Name { get; set; }
         public List<Message> Messages { get; set; }
         [JsonIgnore]
         public List<UserDialog> UserDialog { get; set; }
+
+        public Dialog()
+        {
+            Messages = new List<Message>();
+            UserDialog = new List<UserDialog>();
+        }
 
     }
 }

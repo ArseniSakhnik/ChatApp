@@ -1,8 +1,10 @@
-﻿using ChatApp.Models;
+﻿using ChatApp.Entities;
+using ChatApp.Models;
 using ChatApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 
 
@@ -37,7 +39,7 @@ namespace ChatApp.Controllers
             }
             else
             {
-                return BadRequest(new { message = "Не удалось зарегистрироваться. Пользователь уже зарегистрирован" });
+                return BadRequest();
             }
         }
 
@@ -91,30 +93,18 @@ namespace ChatApp.Controllers
             return Ok(new { message = "Token revoked" });
         }
 
-        [Authorize]
-        [HttpGet("get")]
-        public IActionResult Get()
+        [AllowAnonymous]
+        [HttpPost("get")]
+        public IActionResult Get([FromBody] UserExitstsRequest request)
         {
-            return Content(User.Identity.Name);
-        }
-
-
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            var user = _userService.GetById(id);
-            if (user == null) return NotFound();
-
-            return Ok(user);
-        }
-
-        [HttpGet("{id}/refresh-tokens")]
-        public IActionResult GetRefreshTokens(int id)
-        {
-            var user = _userService.GetById(id);
-            if (user == null) return NotFound();
-
-            return Ok(user.RefreshTokens);
+            if (_userService.UserExists(request.Username))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
 

@@ -18,6 +18,7 @@ namespace ChatApp.Services
         //List<Message> GetSenderAndRecipientMessages(int senderId, int recipientId);
         bool SendMessage(string username, int dialogId, string text);
         List<Dialog> GetDialogs(string username);
+        bool CreateDialog(string firstUsername, string secondUsername, out int dialogId);
     }
 
     public class MessageService : IMessageService
@@ -83,5 +84,49 @@ namespace ChatApp.Services
 
             return true;
         }
+
+        public bool CreateDialog(string firstUsername, string secondUsername, out int dialogId)
+        {
+            var firstUser = _context.Users.SingleOrDefault(u => u.Username == firstUsername);
+            if (firstUser == null)
+            {
+                dialogId = -1;
+                return false;
+            }
+            var secondUser = _context.Users.SingleOrDefault(u => u.Username == secondUsername);
+            if (secondUser == null)
+            {
+                dialogId = -1;
+                return false;
+            }
+
+            var dialog = new Dialog();
+
+            dialog.UserDialog.Add(new UserDialog
+            {
+                Username = firstUser.Username,
+                User = firstUser,
+                Dialog = dialog,
+                DialogId = dialog.Id
+            });
+
+            dialog.UserDialog.Add(new UserDialog
+            {
+                Username = secondUser.Username,
+                User = secondUser,
+                Dialog = dialog,
+                DialogId = dialog.Id
+            });
+
+            dialog.Name = $"{firstUser.Username}, {secondUser.Username}";
+
+            _context.Dialogs.Add(dialog);
+            _context.SaveChanges();
+
+            dialogId = dialog.Id;
+
+            return true;
+        }
+
     }
 }
